@@ -1,13 +1,14 @@
 # -*- coding: UTF-8 -*-
 import random
 import os
+import operator
 
-def check_in_list(order_list,tabu_list):
-    result = False
-    for i in tabu_list:
-        if(order_list == i):
-            result = True
-    return result
+
+def check_in_list(order_list,check_list):
+    for i in check_list:
+        if(operator.eq(order_list,i)):
+            return True
+    return False
 
 def caluc_max(machine,num_jobs,num_machine):
     #make a copy
@@ -54,11 +55,10 @@ def do_tabu(file_name):
     num_jobs = None
     best_score = 9999
     machines = []
-    job_order = []
     tabu_list = []
-    tabu_count = 0
     iter_count = 0
     iter_max = 10000
+    tabu_list_max = 200
 
     #open file
     print("read: " + file_name)
@@ -80,37 +80,33 @@ def do_tabu(file_name):
         temp[:] = [int(x) for x in temp]
         machines.append(data[i])
 
-    #make job order
-    for i in range(0,num_jobs):
-        job_order.append(i)
-
-    random.shuffle(job_order)
-    tabu_list.append(job_order)
-
-    #do tabu search 20 times
+    #do tabu search iter_max times
     while(iter_count<iter_max):
-        #if order in tabu list
-        if(not check_in_list(job_order,tabu_list)):
-            random.shuffle(job_order)
+        #make a job order
+        job_order = []
+        for i in range(0,num_jobs):
+            job_order.append(i)
+        #shuffle job order
+        random.shuffle(job_order)
+
+        #if order in tabu list, pass this order
+        if(check_in_list(job_order,tabu_list)):
+            pass
         #if order not in tabu list, do tabu search
         else:
-            #if list more then 20, delete oldest order
-            if(tabu_count==20):
+            #if list more then max, delete oldest order
+            if(len(tabu_list)==tabu_list_max):
                 del tabu_list[0]
-            #add count
-            tabu_count += 1
+            #add iter count
             iter_count += 1
             #add order to tabu list
             tabu_list.append(job_order)
-            cc = make_order(machines,job_order,num_jobs,num_machine)
-            score = caluc_max(cc,num_jobs,num_machine)
+            machine_list = make_order(machines,job_order,num_jobs,num_machine)
+            score = caluc_max(machine_list,num_jobs,num_machine)
             #update score
             if(score<best_score):
                 best_score = score
-            #shuffle order
-            random.shuffle(job_order)
     return best_score
-
 
 if __name__=="__main__":
     #load all data
