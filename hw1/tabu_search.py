@@ -2,7 +2,7 @@
 import random
 import os
 import operator
-
+import time
 
 def check_in_list(order_list,check_list):
     for i in check_list:
@@ -45,9 +45,7 @@ def make_order(machine,order,num_jobs,num_machine):
         for j in range(0,num_jobs):
             now = order[j]
             temp[i].append(machine[i][now])
-
     return temp
-
 
 def do_tabu(file_name):
     #init var
@@ -114,5 +112,8 @@ if __name__=="__main__":
 
     #every data do tabu
     for i in files:
+        start_time = time.time()
         result = do_tabu("./data/" + i)
-        print(i + " best is: " + str(result) + "\n")
+        print(i + " best is: " + str(result))
+        execute_time = time.time() - start_time
+        print("execute time: %.4fs\n" % (execute_time))
