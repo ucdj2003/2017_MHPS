@@ -64,6 +64,7 @@ def do_tabu(file_name):
     num_machine = None
     num_jobs = None
     best_score = 9999
+    best_order = None
     worst_score = 0
     avg_score = 0
     machines = []
@@ -131,11 +132,12 @@ def do_tabu(file_name):
             #update score
             if(score<best_score):
                 best_score = score
+                best_order = job_order
             if(score>worst_score):
                 worst_score = score
             avg_score += score
     avg_score = avg_score/iter_count
-    return best_score,worst_score,avg_score
+    return best_score,worst_score,avg_score,best_order
 
 if __name__=="__main__":
     #load all data
@@ -143,10 +145,12 @@ if __name__=="__main__":
     #every file do tabu search
     for i in files:
         start_time = time.time()
-        best,worst,avg = do_tabu("./data/" + i)
+        best,worst,avg,order = do_tabu("./data/" + i)
         execute_time = time.time() - start_time
 
         print("best score is: " + str(best))
         print("worst score is: " + str(worst))
         print("avg score is: " + str(avg))
+        print("best order is: ")
+        print(order)
         print("execute time: %.4fs\n" % (execute_time))
