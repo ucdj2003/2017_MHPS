@@ -52,10 +52,12 @@ def do_tabu(file_name):
     num_machine = None
     num_jobs = None
     best_score = 9999
+    worst_score = 0
+    avg_score = 0
     machines = []
     tabu_list = []
     iter_count = 0
-    iter_max = 10000
+    iter_max = 100000
     tabu_list_max = 200
 
     #open file
@@ -71,6 +73,8 @@ def do_tabu(file_name):
 
     print("number of machine: " + str(num_machine))
     print("number of jobs: " + str(num_jobs))
+    print("iter: " + str(iter_max))
+    print("tabu list length: " + str(tabu_list_max))
 
     #trans str to int
     for i in range(1,num_machine+1):
@@ -104,7 +108,11 @@ def do_tabu(file_name):
             #update score
             if(score<best_score):
                 best_score = score
-    return best_score
+            if(score>worst_score):
+                worst_score = score
+            avg_score += score
+    avg_score = avg_score/iter_count
+    return best_score,worst_score,avg_score
 
 if __name__=="__main__":
     #load all data
@@ -113,7 +121,10 @@ if __name__=="__main__":
     #every data do tabu
     for i in files:
         start_time = time.time()
-        result = do_tabu("./data/" + i)
-        print(i + " best is: " + str(result))
+        best,worst,avg = do_tabu("./data/" + i)
         execute_time = time.time() - start_time
+
+        print("best score is: " + str(best))
+        print("worst score is: " + str(worst))
+        print("avg score is: " + str(avg))
         print("execute time: %.4fs\n" % (execute_time))
