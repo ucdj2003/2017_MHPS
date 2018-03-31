@@ -10,17 +10,29 @@ def check_in_list(order_list,check_list):
             return True
     return False
 
+def swap_order(orignal_order,swap_num):
+    #swap order[num0] and order[num1]
+    temp_order = None
+    temp_order = orignal_order
+    temp = temp_order[swap_num[0]]
+    temp_order[swap_num[0]] = temp_order[swap_num[1]]
+    temp_order[swap_num[1]] = temp
+    return temp_order
+
+def make_new_order(orignal_order,jobs):
+    #create two random number to swap
+    random_number = random.sample(range(jobs), 2)
+    return swap_order(orignal_order,random_number)
+
 def caluc_max(machine,num_jobs,num_machine):
     #make a copy
     temp = machine
-
     #init frist row
     for i in range(0,num_jobs):
         if(i==0):
             pass
         else:
             temp[0][i] += temp[0][i-1]
-
     #update every row
     for i in range(1,num_machine):
         for j in range(0,num_jobs):
@@ -40,7 +52,7 @@ def make_order(machine,order,num_jobs,num_machine):
     temp = []
     for i in range(0,num_machine):
         temp.append([])
-
+    #fellow order list adjust job list
     for i in range(0,num_machine):
         for j in range(0,num_jobs):
             now = order[j]
@@ -57,11 +69,10 @@ def do_tabu(file_name):
     machines = []
     tabu_list = []
     iter_count = 0
-    iter_max = 100000
+    iter_max = 10000
     tabu_list_max = 200
 
     #open file
-    print("read: " + file_name)
     f = open(file_name)
     data = []
     lines = f.readlines()
@@ -71,9 +82,11 @@ def do_tabu(file_name):
     num_machine = int(data[0][1])
     num_jobs = int(data[0][0])
 
-    print("number of machine: " + str(num_machine))
+    #print details
+    print("read: " + file_name)
+    print("number of machines: " + str(num_machine))
     print("number of jobs: " + str(num_jobs))
-    print("iter: " + str(iter_max))
+    print("iterations: " + str(iter_max))
     print("tabu list length: " + str(tabu_list_max))
 
     #trans str to int
@@ -82,14 +95,22 @@ def do_tabu(file_name):
         temp[:] = [int(x) for x in temp]
         machines.append(data[i])
 
+    #create a temp order save current job order
+    temp_order = []
+    for i in range(0,num_jobs):
+            temp_order.append(i) 
+
     #do tabu search iter_max times
     while(iter_count<iter_max):
         #make a job order
         job_order = []
-        for i in range(0,num_jobs):
+        #load previous order to job order
+        for i in temp_order:
             job_order.append(i)
-        #shuffle job order
-        random.shuffle(job_order)
+        #use previous job order to create new order
+        job_order = make_new_order(job_order,num_jobs)
+        #update temp order
+        temp_order = job_order
 
         #if order in tabu list, pass this order
         if(check_in_list(job_order,tabu_list)):
@@ -103,7 +124,9 @@ def do_tabu(file_name):
             iter_count += 1
             #add order to tabu list
             tabu_list.append(job_order)
+            #use job order adjust machine's job list
             machine_list = make_order(machines,job_order,num_jobs,num_machine)
+            #calculation score
             score = caluc_max(machine_list,num_jobs,num_machine)
             #update score
             if(score<best_score):
@@ -117,8 +140,7 @@ def do_tabu(file_name):
 if __name__=="__main__":
     #load all data
     files = os.listdir("./data/")
-
-    #every data do tabu
+    #every file do tabu search
     for i in files:
         start_time = time.time()
         best,worst,avg = do_tabu("./data/" + i)
